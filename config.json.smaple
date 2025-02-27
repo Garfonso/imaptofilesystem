@@ -1,0 +1,7 @@
+{
+    "user": "IMAPUser",
+    "password": "IMAPPassword",
+    "host": "imap.host.xyz",
+    "port": "993",
+    "tls": true
+}
