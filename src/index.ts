@@ -1,22 +1,71 @@
 'use strict';
 
-import { Logger } from 'sitka';
+import { Config } from './Config';
+import { Logger } from './Logger';
+import { WatchMailbox } from './WatchMailbox';
 
-export class Example {
-	/* Private Instance Fields */
+/**
+ * ImapToFilesystem
+ */
+export class ImapToFilesystem {
+    config: Config;
+    _logger: Logger;
+    watchers: WatchMailbox[] = [];
 
-	private _logger: Logger;
+    /**
+     * Constructor.
+     */
+    constructor() {
+        this._logger = Logger.getLogger({ name: this.constructor.name });
+        this.config = new Config();
+    }
 
-	/* Constructor */
+    /**
+     * Main function.
+     */
+    async main(): Promise<void> {
+        await this.config.loadConfig();
 
-	constructor() {
-		this._logger = Logger.getLogger({ name: this.constructor.name });
-	}
+        if (!this.config.imap) {
+            this._logger.error('No imap configuration found.');
+            return;
+        }
+        //recreate logger with config:
+        Logger.setConfig(this.config.logger);
+        this._logger = Logger.getLogger({ name: this.constructor.name });
 
-	/* Public Instance Methods */
-
-	public exampleMethod(param: string): string {
-		this._logger.debug('Received: ' + param);
-		return param;
-	}
+        const mailboxes: string[] = [];
+        for (const filter of this.config.filters) {
+            if (filter.mailBoxToWatch) {
+                if (!mailboxes.includes(filter.mailBoxToWatch)) {
+                    mailboxes.push(filter.mailBoxToWatch);
+                }
+            } else {
+                if (!mailboxes.includes('INBOX')) {
+                    mailboxes.push('INBOX');
+                }
+            }
+        }
+        if (mailboxes.length === 0) {
+            mailboxes.push('INBOX');
+        }
+        this._logger.debug('Watching mailboxes:', mailboxes);
+        const promises = [];
+        for (const mailbox of mailboxes) {
+            const watcher = new WatchMailbox(mailbox);
+            this.watchers.push(watcher);
+            promises.push(watcher.watchMailbox(this.config.imap, this.config.filters));
+        }
+        await Promise.all(promises);
+    }
 }
+
+const app = new ImapToFilesystem();
+app.main()
+    .then(() => {
+        console.log('Watcher setup.');
+    })
+    .catch(e => {
+        console.error(e);
+        process.exit(1);
+    });
