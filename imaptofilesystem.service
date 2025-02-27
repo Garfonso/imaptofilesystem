@@ -3,7 +3,7 @@ Description=save files from imap to filesystem
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/node /opt/imaptofilesystem/.js
+ExecStart=/usr/bin/node /opt/imaptofilesystem/dist/index.js
 Restart=on-failure
 StandardOutput=journal+console
 StandardError=journal+console
