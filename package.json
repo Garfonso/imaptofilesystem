@@ -28,25 +28,28 @@
     "clean:all": "npm run clean && (rm -r ./node_modules || true)",
     "cover": "nyc npm run test",
     "cover:check": "nyc --check-coverage --reporter=lcov npm run test",
-    "lint": "eslint --ext .ts --fix src/**/*.ts test/**/*.ts",
+    "lint": "eslint --ext .ts --fix src/**/*.ts",
     "preversion": "npm run build && npm run cover:check",
     "postversion": "git push && git push --tags",
     "prepare": "npm run build",
     "serve": "nodemon ./src/index.ts",
     "test": "mocha",
     "upgrade": "npx npm-check -u",
-    "version": "npm run build && npm run changelog:update"
+    "version": "npm run build && npm run changelog:update",
+    "release": "release-script"
   },
   "devDependencies": {
+    "@alcalzone/release-script": "^3.8.0",
+    "@alcalzone/release-script-plugin-license": "^3.7.0",
+    "@iobroker/eslint-config": "^1.0.0",
     "@types/chai": "^4.3.5",
+    "@types/mailparser": "^3.4.5",
     "@types/mocha": "^10.0.1",
     "@types/node": "^20.4.1",
-    "@typescript-eslint/eslint-plugin": "^5.61.0",
-    "@typescript-eslint/parser": "^5.61.0",
+    "@types/node-imap": "^0.9.3",
     "chai": "^4.3.7",
     "conventional-changelog-cli": "^5.0.0",
     "cz-conventional-changelog": "^3.3.0",
-    "eslint": "^8.44.0",
     "mocha": "^10.2.0",
     "nodemon": "^3.0.1",
     "nyc": "^15.1.0",
@@ -60,6 +63,8 @@
     }
   },
   "dependencies": {
-    "sitka": "^1.1.1"
+    "imap-idle-keep-connection": "^0.4.2",
+    "mailparser": "^3.7.2",
+    "seq-logging": "^2.2.0"
   }
 }
