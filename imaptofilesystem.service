@@ -1,0 +1,13 @@
+[Unit]
+Description=save files from imap to filesystem
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/node /opt/imaptofilesystem/.js
+Restart=on-failure
+StandardOutput=journal+console
+StandardError=journal+console
+SyslogIdentifier=imaptofilesystem
+
+[Install]
+WantedBy=default.target
