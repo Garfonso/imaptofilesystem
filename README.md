@@ -27,59 +27,6 @@ Once you've enabled CI, test coverage, and dependency reports for your project, 
     * [Publishing to NPMJS](#publishing-to-npmjs)
 * [Contributing](#contributing)
 
-## Project Creation
-
-Clone this repo into the directory you want to use for your new project, delete the Git history, and then reinit as a fresh Git repo:
-
-```bash
-$ git clone https://github.com/chriswells0/node-typescript-template.git <your project directory>
-$ cd <your project directory>
-$ rm -rf ./.git/
-$ git init
-$ npm install
-```
-
-## Rebranding
-
-It's a common practice to prefix the source code project name with `node-` to make it clear on GitHub that it's a Node.js project while omitting that prefix in the NPM project since it's understood on npmjs.com.  Thus, the order of these replacements matter.
-
-Be sure to check both [GitHub](https://github.com) and [NPMJS](https://www.npmjs.com) to verify that your project name isn't taken before starting!
-
-Use exact searches to perform the following replacements throughout this project for the most efficient rebranding process:
-
-1. Replace my name with yours: `Chris Wells`
-2. Replace my website URL with yours: `https://chriswells.io`
-3. Replace my *GitHub* username and project name with yours: `chriswells0/node-typescript-template`
-4. Replace my *NPM* project name with yours: `typescript-template`
-5. Update [package.json](package.json):
-	* Change `description` to suit your project.
-	* Update the `keywords` list.
-	* In the `author` section, add `email` if you want to include yours.
-6. If you prefer something other than the [BSD 3-Clause License](https://opensource.org/licenses/BSD-3-Clause), replace the entire contents of [LICENSE](LICENSE) as appropriate.
-7. Update this README.md file to describe your project.
-
-## Managing Your Project
-
-Before committing to a project based on this template, it's recommended that you read about [Conventional Commits](https://conventionalcommits.org) and install [Commitizen CLI](http://commitizen.github.io/cz-cli/) globally.
-
-### Initial Publish
-
-Some additional steps need to be performed for a new project.  Specifically, you'll need to:
-
-1. Create your project on GitHub (do not add a README, .gitignore, or license).
-2. Add the initial files to the repo:
-```bash
-$ git add .
-$ git cz
-$ git remote add origin git@github.com:<your GitHub username>/<your project name>
-$ git push -u origin master
-```
-3. Create accounts on the following sites and add your new GitHub project to them.  The project is preconfigured, so it should "just work" with these tools.
-	* GitHub Actions for continuous integration.
-	* [Coveralls](https://coveralls.io) for unit test coverage verification.
-4. Check the "Actions" tab on the GitHub repo and wait for the Node.js CI build to complete.
-5. Publish your package to NPMJS: `npm publish`
-
 ### Development Workflow
 
 #### Hot reload
@@ -112,6 +59,9 @@ Follow these steps to update your NPM package:
 ## Contributing
 
 This section is here as a reminder for you to explain to your users how to contribute to the projects you create from this template.
+
+### Attribution
+Based on the [Node.js TypeScript Template](https://github.com/chriswells0/node-typescript-template.git) by [Chris Wells](https://chriswells.io).
 
 [build-image]: https://img.shields.io/github/actions/workflow/status/chriswells0/node-typescript-template/ci-build.yaml?branch=master
 [build-url]: https://github.com/chriswells0/node-typescript-template/actions/workflows/ci-build.yaml
