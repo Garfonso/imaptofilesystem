@@ -5,11 +5,15 @@ export type LoggerConfig = {
     /**
      * Server URL for Seq.
      */
-    serverUrl: string;
+    serverUrl?: string;
     /**
      * API key for Seq.
      */
-    apiKey: string;
+    apiKey?: string;
+    /**
+     * Enable seq logging. URL, and api key need to be filled accordingly.
+     */
+    useSeq?: boolean;
     /**
      * Enable debug logging for all loggers with default config.
      */
@@ -28,6 +32,7 @@ export class Logger {
     private readonly debugLogging: boolean;
     private readonly useConsole: boolean;
     private seqLogger: Seq | undefined;
+    private static useSeq = false;
     private static serverUrl = 'http://localhost:5341';
     private static apiKey = '';
     private static defaultDebug = false;
@@ -49,8 +54,9 @@ export class Logger {
      * @param config - configuration
      */
     static setConfig(config: LoggerConfig): void {
-        Logger.serverUrl = config.serverUrl;
-        Logger.apiKey = config.apiKey;
+        Logger.serverUrl = config.serverUrl || Logger.serverUrl;
+        Logger.apiKey = config.apiKey || Logger.apiKey;
+        Logger.useSeq = config.useSeq || false;
         Logger.defaultDebug = config.debug || false;
         Logger.defaultUseConsole = config.useConsole || true;
     }
@@ -74,21 +80,23 @@ export class Logger {
         if (this.useConsole) {
             console.log(...msgs);
         }
-        if (!this.seqLogger) {
-            this.seqLogger = new Seq({
-                onError(e: Error): void {
-                    console.error('Error in Seq logger:', e);
-                },
-                serverUrl: Logger.serverUrl,
-                apiKey: Logger.apiKey,
+        if (Logger.useSeq) {
+            if (!this.seqLogger) {
+                this.seqLogger = new Seq({
+                    onError(e: Error): void {
+                        console.error('Error in Seq logger:', e);
+                    },
+                    serverUrl: Logger.serverUrl,
+                    apiKey: Logger.apiKey,
+                });
+            }
+            this.seqLogger.emit({
+                timestamp: new Date(),
+                level: level,
+                messageTemplate: msgs.map(e => (typeof e === 'string' ? e : util.inspect(e))).join(' '),
+                //properties: msgs.filter(e => typeof e !== 'string') -> I'm doing something wrong here, it seems.
             });
         }
-        this.seqLogger.emit({
-            timestamp: new Date(),
-            level: level,
-            messageTemplate: msgs.map(e => (typeof e === 'string' ? e : util.inspect(e))).join(' '),
-            //properties: msgs.filter(e => typeof e !== 'string') -> I'm doing something wrong here, it seems.
-        });
     }
 
     /**
