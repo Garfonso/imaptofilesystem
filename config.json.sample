@@ -1,7 +1,31 @@
 {
-    "user": "IMAPUser",
-    "password": "IMAPPassword",
-    "host": "imap.host.xyz",
-    "port": "993",
-    "tls": true
+    "imap": {
+        "user": "USERNAME",
+        "password": "PASSWORD",
+        "host": "IMAPHOST",
+        "port": "993",
+        "tls": true
+      },
+      "filters": [
+        {
+          "name": "Filter name, just for you to read",
+          "rules": [
+            ["FROM", "mail@of.sender"],
+            ["SUBJECT", "part of subject"],
+            ["TO", "mail@of.recepient.all.is.optional.see.imap.filter.rules"]
+          ],
+          "path": "some path to store file too",
+          "renameRule": "%YEAR%-%MONTH%-%DAY% some fixed text or %NAME% to insert filename of attachment.pdf",
+          "mailBoxDone": "INBOX/MOVEPROCESSEDSTUFFHERE.Optional",
+          "mailBoxToWatch": "INBOX/WatchAnotherFolder.Optional",
+          "disabled": false
+        }
+    },
+    "logger": {
+        "useSeq": true,
+        "serverUrl": "seq-server-url",
+        "apiKey": "seq-api-key",
+        "useConsole": true,
+        "debug": false
+  }
 }
