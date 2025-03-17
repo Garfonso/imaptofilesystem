@@ -36,13 +36,15 @@ export class ImapToFilesystem {
 
         const mailboxes: string[] = [];
         for (const filter of this.config.filters) {
-            if (filter.mailBoxToWatch) {
-                if (!mailboxes.includes(filter.mailBoxToWatch)) {
-                    mailboxes.push(filter.mailBoxToWatch);
-                }
-            } else {
-                if (!mailboxes.includes('INBOX')) {
-                    mailboxes.push('INBOX');
+            if (!filter.disabled) {
+                if (filter.mailBoxToWatch) {
+                    if (!mailboxes.includes(filter.mailBoxToWatch)) {
+                        mailboxes.push(filter.mailBoxToWatch);
+                    }
+                } else {
+                    if (!mailboxes.includes('INBOX')) {
+                        mailboxes.push('INBOX');
+                    }
                 }
             }
         }

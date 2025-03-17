@@ -204,11 +204,13 @@ export class WatchMailbox {
      */
     async searchAllMessages(filters: Filter[]): Promise<void> {
         for (const filter of filters) {
-            if (
-                filter.mailBoxToWatch === this.mailboxName ||
-                (!filter.mailBoxToWatch && this.mailboxName === 'INBOX')
-            ) {
-                await this.searchMessage(filter);
+            if (!filter.disabled) {
+                if (
+                    filter.mailBoxToWatch === this.mailboxName ||
+                    (!filter.mailBoxToWatch && this.mailboxName === 'INBOX')
+                ) {
+                    await this.searchMessage(filter);
+                }
             }
         }
     }

@@ -13,6 +13,7 @@ export class Filter {
     mailBoxToWatch?: string;
     mailBoxDone?: string;
     filterFilename?: string;
+    disabled?: boolean;
 
     /**
      * Constructor.
