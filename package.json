@@ -42,21 +42,21 @@
   "devDependencies": {
     "@alcalzone/release-script": "^3.8.0",
     "@alcalzone/release-script-plugin-license": "^3.7.0",
-    "@iobroker/eslint-config": "^1.0.0",
-    "@types/chai": "^4.3.5",
+    "@iobroker/eslint-config": "^2.0.1",
+    "@types/chai": "^5.2.0",
     "@types/mailparser": "^3.4.5",
-    "@types/mocha": "^10.0.1",
-    "@types/node": "^20.4.1",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^20.17.24",
     "@types/node-imap": "^0.9.3",
-    "chai": "^4.3.7",
+    "chai": "^4.5.0",
     "conventional-changelog-cli": "^5.0.0",
     "cz-conventional-changelog": "^3.3.0",
-    "mocha": "^10.2.0",
-    "nodemon": "^3.0.1",
+    "mocha": "^10.8.2",
+    "nodemon": "^3.0.3",
     "nyc": "^15.1.0",
     "source-map-support": "^0.5.21",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.1.6"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
   },
   "config": {
     "commitizen": {
