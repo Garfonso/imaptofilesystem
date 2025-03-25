@@ -90,6 +90,14 @@ export class WatchMailbox {
      * @param uid - uid of the message to process (found by search)
      */
     async processFilteredMessage(filter: Filter, uid: number): Promise<void> {
+        if (!filter.path) {
+            //no path, no need to download message. Just flag or move it.
+            this._logger.debug(`${filter.name}: No path, just flagging and moving message ${uid}`);
+            await this.addFlag(uid, filter);
+            await this.moveMail(uid, filter); //maybe move.
+            return;
+        }
+
         return new Promise((resolve, reject) => {
             const fetch = this.imap!.fetch([uid], { bodies: '', struct: true });
 
