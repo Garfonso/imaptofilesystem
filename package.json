@@ -1,19 +1,20 @@
 {
   "name": "imaptofilesystem",
-  "version": "1.0.7",
-  "description": "A complete Node.js project template using TypeScript and following general best practices.",
+  "version": "0.0.1",
+  "description": "Watch mailboxes and store attachments in a filesystem based on filter rules.",
   "keywords": [
-    "typescript",
-    "template"
+    "imap",
+    "mail",
+    "filesystem",
+    "automation"
   ],
   "author": {
-    "name": "Chris Wells",
-    "url": "https://chriswells.io"
+    "name": "Achim Königs"
   },
   "license": "BSD-3-Clause",
   "repository": {
     "type": "git",
-    "url": "https://github.com/chriswells0/node-typescript-template.git"
+    "url": "https://github.com/Garfonso/imaptofilesystem"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
