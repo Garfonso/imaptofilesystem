@@ -45,7 +45,7 @@
     "@alcalzone/release-script-plugin-license": "^3.7.0",
     "@iobroker/eslint-config": "^2.3.4",
     "@types/chai": "^5.2.0",
-    "@types/mailparser": "^3.4.6",
+    "@types/mailparser": "^3.9.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "^20.17.24",
     "@types/node-imap": "^0.9.3",
@@ -66,7 +66,7 @@
   },
   "dependencies": {
     "imap-idle-keep-connection": "^0.4.2",
-    "mailparser": "^3.9.31",
+    "mailparser": "^3.9.33",
     "seq-logging": "^2.2.0"
   }
 }
