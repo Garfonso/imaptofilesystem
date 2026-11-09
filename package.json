@@ -66,7 +66,7 @@
   },
   "dependencies": {
     "imap-idle-keep-connection": "^0.4.2",
-    "mailparser": "^3.14.1",
+    "mailparser": "^3.14.2",
     "seq-logging": "^2.2.0"
   }
 }
