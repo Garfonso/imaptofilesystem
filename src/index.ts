@@ -51,14 +51,19 @@ export class ImapToFilesystem {
         if (mailboxes.length === 0) {
             mailboxes.push('INBOX');
         }
-        this._logger.debug('Watching mailboxes:', mailboxes);
-        const promises = [];
+        this._logger.info('Watching mailboxes:', mailboxes.join(', '));
         for (const mailbox of mailboxes) {
-            const watcher = new WatchMailbox(mailbox);
+            const watcher = new WatchMailbox(mailbox, this.config.filters);
             this.watchers.push(watcher);
-            promises.push(watcher.watchMailbox(this.config.imap, this.config.filters));
+            watcher.start(this.config.imap);
         }
-        await Promise.all(promises);
+    }
+
+    /**
+     * Log out of all mailboxes.
+     */
+    async stop(): Promise<void> {
+        await Promise.all(this.watchers.map(watcher => watcher.stop()));
     }
 }
 
@@ -68,6 +73,14 @@ app.main()
         console.log('Watcher setup.');
     })
     .catch(e => {
-        console.error(e);
+        console.error(e instanceof Error ? e.message : e);
         process.exit(1);
     });
+
+for (const signal of ['SIGTERM', 'SIGINT'] as const) {
+    process.once(signal, () => {
+        const timeout = setTimeout(() => process.exit(1), 5000);
+        timeout.unref();
+        void app.stop().finally(() => process.exit(0));
+    });
+}

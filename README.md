@@ -1,3 +1,28 @@
+# imaptofilesystem
+
+Watches IMAP mailboxes (IDLE) and stores attachments of mails matching filters in the
+filesystem. Processed mails get the keyword `AttachmentSaved` and are moved to `mailBoxDone`.
+Connections are kept by [imap-idle-keep-connection](https://github.com/Garfonso/ImapIdleKeepConnection) (imapflow).
+
+## Config
+
+`config.json` next to `dist/`, see [config.json.sample](config.json.sample). `search` is an
+imapflow search object (`SearchObject`, see [imapflow](https://github.com/postalsys/imapflow)): all keys
+have to match, `or` takes a list, `not` an object, e.g. `{ "seen": false, "subject": "Invoice" }`.
+
+- Attachments are never overwritten: same content is skipped, different content is saved as
+  `name (2).pdf`.
+- Mails without a matching attachment are marked as processed, but not moved.
+
+### Migrating from "rules"
+
+Older configs used `rules` (node-imap search criteria as nested arrays). Convert them once,
+a backup is written to `config.json.bak`:
+
+```sh
+node dist/convertConfig.js /opt/imaptofilesystem/config.json
+```
+
 # Node.js TypeScript Template
 
 [![Package Version][package-image]][package-url]

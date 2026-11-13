@@ -1,5 +1,6 @@
 import path from 'path';
 import { readFile, writeFile } from 'node:fs/promises';
+import type { SearchObject } from 'imap-idle-keep-connection';
 import { Logger, type LoggerConfig } from './Logger';
 
 /**
@@ -7,7 +8,8 @@ import { Logger, type LoggerConfig } from './Logger';
  */
 export class Filter {
     name: string;
-    rules: Array<string | string[]>; // as in node-imap.SearchCriteria
+    /** imapflow search object, e.g. { seen: false, subject: 'Invoice', or: [{ from: 'a' }, { from: 'b' }] } */
+    search: SearchObject;
     path: string;
     renameRule: string;
     mailBoxToWatch?: string;
@@ -19,7 +21,7 @@ export class Filter {
      * Constructor.
      *
      * @param name name of filter rule for easier reference
-     * @param rules set of rules that have to apply
+     * @param search imapflow search object, all conditions have to apply
      * @param path path to move possible files to
      * @param renameRule rule to rename files
      * @param mailBoxToWatch mailbox to watch for mails
@@ -28,7 +30,7 @@ export class Filter {
      */
     constructor(
         name = 'Filter',
-        rules: string[] = [],
+        search: SearchObject = {},
         path = '.',
         renameRule = '',
         mailBoxToWatch?: string,
@@ -36,7 +38,7 @@ export class Filter {
         filterFilename?: string,
     ) {
         this.name = name;
-        this.rules = rules;
+        this.search = search;
         this.path = path;
         this.renameRule = renameRule;
         this.mailBoxToWatch = mailBoxToWatch;
@@ -96,6 +98,25 @@ export class ConfigStore {
 }
 
 /**
+ * Throws if a filter has no search object, with a hint for configs in the old format.
+ *
+ * @param filters - filters from the config file
+ * @param filepath - config file, for the message
+ */
+export function validateFilters(filters: Filter[], filepath: string): void {
+    for (const filter of filters) {
+        if ('rules' in filter) {
+            throw new Error(
+                `Filter "${filter.name}" uses the old "rules" format. Convert the config with: node dist/convertConfig.js ${filepath}`,
+            );
+        }
+        if (!filter.search || typeof filter.search !== 'object' || Array.isArray(filter.search)) {
+            throw new Error(`Filter "${filter.name}" needs a "search" object.`);
+        }
+    }
+}
+
+/**
  * Config, loads and holds configuration for devices.
  */
 export class Config {
@@ -128,7 +149,9 @@ export class Config {
             this._logger.debug('Config loaded:', this.configStore);
         } catch (e) {
             this._logger.error('Error loading config: ', e);
+            return;
         }
+        validateFilters(this.configStore.filters ?? [], filepath);
     }
 
     /**
