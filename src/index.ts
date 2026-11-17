@@ -74,13 +74,16 @@ app.main()
     })
     .catch(e => {
         console.error(e instanceof Error ? e.message : e);
-        process.exit(1);
+        void Logger.close().finally(() => process.exit(1));
     });
 
 for (const signal of ['SIGTERM', 'SIGINT'] as const) {
     process.once(signal, () => {
         const timeout = setTimeout(() => process.exit(1), 5000);
         timeout.unref();
-        void app.stop().finally(() => process.exit(0));
+        void app
+            .stop()
+            .finally(() => Logger.close())
+            .finally(() => process.exit(0));
     });
 }

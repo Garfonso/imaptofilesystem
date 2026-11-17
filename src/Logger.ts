@@ -1,4 +1,4 @@
-import { Logger as Seq, type SeqLogLevel } from 'seq-logging';
+import type { SeqEvent, SeqLogLevel } from 'seq-logging';
 import util from 'node:util';
 
 export type LoggerConfig = {
@@ -24,19 +24,49 @@ export type LoggerConfig = {
     useConsole?: boolean;
 };
 
+/** the part of seq-logging's Logger we use. */
+export interface SeqLike {
+    /** queue an event */
+    emit(event: SeqEvent): void;
+    /** send the queue and stop the timers */
+    close(): Promise<unknown>;
+}
+
 /**
- * Logger class with seq support.
+ * Escape text for a Seq message template, { and } would be parsed as properties.
+ *
+ * @param text - text to escape
+ */
+export function escapeTemplate(text: string): string {
+    return text.replace(/[{}]/g, c => c + c);
+}
+
+/**
+ * Logger class with seq support. All loggers share one Seq connection, call Logger.close() before exit
+ * to send the buffered events.
  */
 export class Logger {
     private readonly name: string;
-    private readonly debugLogging: boolean;
-    private readonly useConsole: boolean;
-    private seqLogger: Seq | undefined;
-    private static useSeq = false;
-    private static serverUrl = 'http://localhost:5341';
-    private static apiKey = '';
-    private static defaultDebug = false;
-    private static defaultUseConsole = true;
+    private readonly debugLogging: boolean | undefined;
+    private readonly useConsole: boolean | undefined;
+    private static config: LoggerConfig = {};
+    private static seq: Promise<SeqLike> | undefined;
+    /**
+     * Creates the Seq connection, replaceable for tests. seq-logging 3 is ESM with top-level await,
+     * it can only be loaded with import().
+     *
+     * @param config - logger config with serverUrl and apiKey
+     */
+    static createSeq = async (config: LoggerConfig): Promise<SeqLike> => {
+        const { Logger: Seq } = await import('seq-logging');
+        return new Seq({
+            serverUrl: config.serverUrl || 'http://localhost:5341',
+            apiKey: config.apiKey || undefined,
+            onError(e: Error): void {
+                console.error('Error in Seq logger:', e.message ?? e);
+            },
+        });
+    };
 
     /**
      * Create a logger with a name. Name is added in front of all output.
@@ -49,53 +79,52 @@ export class Logger {
     }
 
     /**
-     * Set the configuration for the logger.
+     * Set the configuration for all loggers, also the ones created before.
      *
      * @param config - configuration
      */
-    static setConfig(config: LoggerConfig): void {
-        Logger.serverUrl = config.serverUrl || Logger.serverUrl;
-        Logger.apiKey = config.apiKey || Logger.apiKey;
-        Logger.useSeq = config.useSeq || false;
-        Logger.defaultDebug = config.debug || false;
-        Logger.defaultUseConsole = config.useConsole || true;
+    static setConfig(config: LoggerConfig | undefined): void {
+        Logger.config = { ...config };
+    }
+
+    /**
+     * Send buffered events to Seq and close the connection. Logging later opens a new one.
+     */
+    static async close(): Promise<void> {
+        const seq = Logger.seq;
+        Logger.seq = undefined;
+        await (await seq?.catch(() => undefined))?.close();
     }
 
     /**
      * Create a logger with a name. Name is added in front of all output.
      *
      * @param name - name of the logger
-     * @param debug - enable debug logging
-     * @param useConsole - enable console logging
+     * @param debug - enable debug logging, default from config
+     * @param useConsole - enable console logging, default from config (on)
      */
-    constructor(name: string, debug = Logger.defaultDebug, useConsole = Logger.defaultUseConsole) {
+    constructor(name: string, debug?: boolean, useConsole?: boolean) {
         this.name = name;
         this.debugLogging = debug;
         this.useConsole = useConsole;
     }
 
-    private log(level: SeqLogLevel, ...msgs: any[]): void {
-        msgs.unshift(new Date().toISOString());
-        msgs.unshift(this.name);
-        if (this.useConsole) {
-            console.log(...msgs);
+    private log(level: SeqLogLevel, ...msgs: unknown[]): void {
+        const timestamp = new Date();
+        const text = msgs.map(e => (typeof e === 'string' ? e : util.inspect(e))).join(' ');
+        if (this.useConsole ?? Logger.config.useConsole ?? true) {
+            console.log(this.name, timestamp.toISOString(), text);
         }
-        if (Logger.useSeq) {
-            if (!this.seqLogger) {
-                this.seqLogger = new Seq({
-                    onError(e: Error): void {
-                        console.error('Error in Seq logger:', e);
-                    },
-                    serverUrl: Logger.serverUrl,
-                    apiKey: Logger.apiKey,
-                });
-            }
-            this.seqLogger.emit({
-                timestamp: new Date(),
-                level: level,
-                messageTemplate: msgs.map(e => (typeof e === 'string' ? e : util.inspect(e))).join(' '),
-                //properties: msgs.filter(e => typeof e !== 'string') -> I'm doing something wrong here, it seems.
-            });
+        if (Logger.config.useSeq) {
+            const event: SeqEvent = {
+                timestamp,
+                level,
+                messageTemplate: `{Logger} ${escapeTemplate(text)}`,
+                properties: { Logger: this.name },
+            };
+            // events stay in order: then() callbacks of one promise run in order.
+            Logger.seq ??= Logger.createSeq(Logger.config);
+            Logger.seq.then(seq => seq.emit(event)).catch(e => console.error('Error in Seq logger:', e));
         }
     }
 
@@ -104,8 +133,8 @@ export class Logger {
      *
      * @param msgs - messages to log
      */
-    debug(...msgs: any[]): void {
-        if (this.debugLogging) {
+    debug(...msgs: unknown[]): void {
+        if (this.debugLogging ?? Logger.config.debug) {
             this.log('Debug', ...msgs);
         }
     }
@@ -115,7 +144,7 @@ export class Logger {
      *
      * @param msgs - messages to log
      */
-    info(...msgs: any[]): void {
+    info(...msgs: unknown[]): void {
         this.log('Information', ...msgs);
     }
 
@@ -124,7 +153,7 @@ export class Logger {
      *
      * @param msgs - messages to log
      */
-    warn(...msgs: any[]): void {
+    warn(...msgs: unknown[]): void {
         this.log('Warning', ...msgs);
     }
 
@@ -133,7 +162,7 @@ export class Logger {
      *
      * @param msgs - messages to log
      */
-    error(...msgs: any[]): void {
+    error(...msgs: unknown[]): void {
         this.log('Error', ...msgs);
     }
 }

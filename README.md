@@ -13,6 +13,8 @@ have to match, `or` takes a list, `not` an object, e.g. `{ "seen": false, "subje
 - Attachments are never overwritten: same content is skipped, different content is saved as
   `name (2).pdf`.
 - Mails without a matching attachment are marked as processed, but not moved.
+- `logger`: `useSeq: true` sends the log to [Seq](https://datalust.co/seq) (`serverUrl`, default
+  `http://localhost:5341`, `apiKey`), `useConsole` (default true), `debug` (default false).
 
 ### Migrating from "rules"
 
